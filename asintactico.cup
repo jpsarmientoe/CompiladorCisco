@@ -1,0 +1,75 @@
+
+package compiladorcisco;
+
+import java_cup.runtime.*;
+import java.io.FileReader;
+
+parser code {:
+    
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+	   System.out.println("info: "+info.toString());
+	   if(info.toString().equals("#0")){System.out.println("No existen datos en el archivo de comandos");}else{
+if(info.toString().equals("#1")){System.out.println("Palabra no reconocida en el archivo de comandos");}else{
+if(info.toString().equals("#2")){System.out.println("Espacio no necesario en el archivo de comandos");}else{
+if(info.toString().equals("#3")){System.out.println("Falta espacio antes de la palabra show en el archivo de comandos");}else{
+if(info.toString().equals("#4")){System.out.println("Falta espacio antes de la palabra ip en el archivo de comandos");}else{
+if(info.toString().equals("#5")){System.out.println("Falta espacio antes de la palabra interface en el archivo de comandos");}else{
+if(info.toString().equals("#6")){System.out.println("Falta espacio antes de la palabra brief en el archivo de comandos");}else{
+if(info.toString().equals("#7")){System.out.println("Falta espacio antes de la palabra serial en el archivo de comandos");}else{
+if(info.toString().equals("#8")){System.out.println("Falta espacio antes de la palabra controllers en el archivo de comandos");}
+}
+}
+}
+}
+}
+}
+}
+}
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" in line "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", column "+(s.right+1));
+            }
+        }
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+   
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+
+    }
+/* Metodo main para garantizar la ejecucion del analizador
+   lexico y sintactico, ademas que se pase como parametro la tabla de simbolos correspondiente. */
+    public static void main(String[] args){
+        try {
+            AnalizadorSintactico asin = new AnalizadorSintactico(
+                    new AnalizadorLexico( new FileReader(args[0])));
+            Object result = asin.parse().value;
+            System.out.println("\n*** Sin Errores de Compilacion ***");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+:};
+
+terminal ESPACIO, MOSTRAR, PROTOCOLO, INTERFAZ, LINEA, PUERTO, CONTROLADOR;
+non terminal Object     programa, linea1, linea2, linea3;
+      
+   programa::= linea1|linea2|linea3;
+   linea1::= MOSTRAR ESPACIO PROTOCOLO ESPACIO INTERFAZ ESPACIO LINEA
+             {:
+                 System.out.println(" El comando indica si una interfaz se configuró correctamente y si se puso en línea "); 
+             :};
+   linea2::= MOSTRAR ESPACIO INTERFAZ ESPACIO PUERTO
+             {:
+                 System.out.println(" El comando brinda más información acerca de la interfaz que está fallando y también muestra qué encapsulación se está utilizando en la interfaz "); 
+             :};
+   linea3::= MOSTRAR ESPACIO CONTROLADOR ESPACIO PUERTO
+             {:
+                 System.out.println(" El comando indica el estado de los canales de la interfaz y si un cable está conectado a la interfaz o no "); 
+             :};
